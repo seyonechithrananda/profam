@@ -109,9 +109,14 @@ class ProteinDataMixture(LightningDataModule):
             if stage != "test":
                 assert len(train_datasets) > 0
             if len(train_datasets) > 1:
-                assert (
-                    len(set([type(ds) for ds in train_datasets])) == 1
-                ), "All train datasets must be same type"
+                #assert (
+                #    len(set([type(ds) for ds in train_datasets])) == 1
+                #), "All train datasets must be same type"
+                for ds, name in zip(train_datasets, train_dataset_names):
+                    assert isinstance(ds, Dataset), f"{name} is not a Dataset"
+                    assert hasattr(ds, '__len__'), f"{name} has no __len__ method"
+                    assert 'input_ids' in ds[0], f"{name} has no input_ids in dict format"
+                    print("Using modified ProteinDataMixture for mixed datasets with trajectories")
                 print(
                     f"Using interleaved train dataset with {len(train_datasets)} datasets, shuffle = {self.shuffle}, interleaved = {self.interleaved}"
                 )
