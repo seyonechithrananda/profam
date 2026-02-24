@@ -280,6 +280,15 @@ class SampleCounter(Callback):
             sync_dist=False,
             rank_zero_only=True,
         )
+        if self.total_train_samples:
+            pl_module.log(
+                "train/effective_epoch",
+                self.samples_seen / self.total_train_samples,
+                on_step=True,
+                on_epoch=False,
+                sync_dist=False,
+                rank_zero_only=True,
+            )
         # rank_zero_info(f"Total samples seen: {self.samples_seen}")
 
         # # Log dataset sample counts
@@ -307,6 +316,7 @@ class SampleCounter(Callback):
     def on_fit_start(self, trainer: L.Trainer, pl_module: L.LightningModule) -> None:
         super().on_fit_start(trainer, pl_module)
         trainer.samples_seen = self.samples_seen
+        self.total_train_samples = len(trainer.datamodule.train_dataset)
 
 
 class CountUniqueBatches(Callback):
